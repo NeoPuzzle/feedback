@@ -8,6 +8,7 @@ import { FeedbackTypeService } from "src/feedbacktype/feedback-type.service";
 import { LocalService } from "src/local/local.service";
 import { UsersService } from "src/users/users.service";
 import { Repository } from "typeorm";
+import cloudinary from "src/config/cloudinary";
 
 @Injectable()
 export class FeedbackService {
@@ -37,23 +38,52 @@ export class FeedbackService {
             return feedback
     }
 
-    async createFeedback(createFeedbackDto: CreateFeedbackDto): Promise <Feedback> {
-        const user = createFeedbackDto.userId ? await this.usersService.findOne(createFeedbackDto.userId) : null;
+    async uploadImage(files: Express.Multer.File): Promise<string> {
+        if (!files || !files.buffer || files.buffer.length === 0) {
+            throw new Error('File is empty');
+        }
+        return new Promise((resolve, reject) => {
+            cloudinary.uploader.upload_stream({ resource_type: 'auto' },(error, result) => {
+                if (error) {
+                    return reject(error);
+                }
+                resolve(result.secure_url);
+            }).end(files.buffer);
+        });
+    }
+
+    async createFeedback(createFeedbackDto: CreateFeedbackDto, image1: Express.Multer.File, image2: Express.Multer.File): Promise <Feedback> {
+        const user = createFeedbackDto.user_id ? await this.usersService.findOne(createFeedbackDto.user_id) : null;
         const local = createFeedbackDto.localId ? await this.localService.findOne(createFeedbackDto.localId) : null;
         const type = createFeedbackDto.typeId ? await this.feedbackTypeService.findOne(createFeedbackDto.typeId) : null;
         const destination = createFeedbackDto.destinationId ? await this.destinationTypeService.findOne(createFeedbackDto.destinationId) : null;
+        
+        let image1Url: string | undefined;
+        let image2Url: string | undefined;
+        
+        if (image1) {
+            image1Url = await this.uploadImage(image1);
+        }
+        if (image2) {
+            image2Url = await this.uploadImage(image2);
+        }
 
         const feedback = this.feedbackRepository.create({
-            ...createFeedbackDto,
+            subject: createFeedbackDto.subject,
+            description: createFeedbackDto.description,
+            date: createFeedbackDto.date ? new Date(createFeedbackDto.date) : undefined,
+            image1Url,
+            image2Url,
             user,
             local,
             type,
             destination,
         });
+        
         return this.feedbackRepository.save(feedback);
     }
 
-    async updateFeedback(id: string, updateFeedbackDto: UpdateFeedbackDto) : Promise<Feedback> {
+    async updateFeedback(id: string, updateFeedbackDto: UpdateFeedbackDto, files: any) : Promise<Feedback> {
         const feedback = await this.findOne(id);
         if (updateFeedbackDto.userId) {
             feedback.user = await this.usersService.findOne(updateFeedbackDto.userId);
@@ -66,6 +96,13 @@ export class FeedbackService {
         }
         if (updateFeedbackDto.destinationId) {
             feedback.destination = await this.destinationTypeService.findOne(updateFeedbackDto.destinationId);
+        }
+
+        if (files.image1) {
+            feedback.image1Url = await this.uploadImage(files.image1);
+        }
+        if (files.image2) {
+            feedback.image2Url = await this.uploadImage(files.image2);
         }
         Object.assign(feedback, updateFeedbackDto);
         return this.feedbackRepository.save(feedback);

@@ -8,9 +8,13 @@ import { ManagerModule } from './manager/manager.module';
 import { LocalModule } from './local/local.module';
 import { FeedbackTypeModule } from './feedbacktype/feedback-type.module';
 import { DestinationTypeModule } from './destinationfeedback/destination-feedback.module';
+import { MulterModule } from '@nestjs/platform-express';
 
 @Module({
   imports: [
+    MulterModule.register({
+      dest: './uploads',
+  }),
     ConfigModule.forRoot({
       isGlobal: true,
       load: [typeOrmConfig]
