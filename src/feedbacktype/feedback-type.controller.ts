@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { FeedbackTypeService } from './feedback-type.service';
-import { CreateFeedbackDto } from 'src/dtos/create-feedback.dto';
 import { UpdateFeedbackTypeDto } from 'src/dtos/update-feedback-type.dto';
+import { CreateFeedbackTypeDto } from 'src/dtos/create-feedback-type.dto';
 
 @Controller('feedback-type')
 export class FeedbackTypeController {
@@ -18,8 +18,8 @@ export class FeedbackTypeController {
     }
 
     @Post()
-    createType(@Body() createFeedbackDto: CreateFeedbackDto) {
-        return this.feedbackTypeService.createType(createFeedbackDto);
+    createType(@Body() createFeedbackTypeDto: CreateFeedbackTypeDto) {
+        return this.feedbackTypeService.createType(createFeedbackTypeDto);
     }
 
     @Put(':id')

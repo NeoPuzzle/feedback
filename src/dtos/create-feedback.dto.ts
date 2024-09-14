@@ -15,7 +15,15 @@ export class CreateFeedbackDto {
 
   @IsOptional()
   @IsString()
-  userId?: string;
+  image1Url?: string;
+
+  @IsOptional()
+  @IsString()
+  image2Url?: string;
+
+  @IsOptional()
+  @IsString()
+  user_id?: string;
 
   @IsOptional()
   @IsString()

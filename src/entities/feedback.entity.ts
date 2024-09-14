@@ -17,8 +17,14 @@ export class Feedback {
     @Column('text')
     description: string;
 
-    @Column({ type: 'date', nullable: true })
+    @Column({ type: 'timestamp', nullable: true })
     date?: Date;
+
+    @Column({ nullable: true })
+    image1Url?: string;
+
+    @Column({ nullable: true })
+    image2Url?: string;
 
     @ManyToOne(() => Users, (user) => user.feedbacks, { nullable: true})
     @JoinColumn({name: 'user_id'})

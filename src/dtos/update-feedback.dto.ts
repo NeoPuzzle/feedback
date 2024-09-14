@@ -15,6 +15,14 @@ export class UpdateFeedbackDto {
 
   @IsOptional()
   @IsString()
+  image1Url?: string;
+
+  @IsOptional()
+  @IsString()
+  image2Url?: string;
+
+  @IsOptional()
+  @IsString()
   userId?: string;
 
   @IsOptional()
