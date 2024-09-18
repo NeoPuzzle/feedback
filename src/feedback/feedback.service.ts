@@ -23,7 +23,7 @@ export class FeedbackService {
 
     getAll(): Promise<Feedback[]> {
         return this.feedbackRepository.find({
-            relations: ['user', 'local', 'type', 'destination'],
+            relations: ['user', 'local', 'type', 'destination', 'manager'],
         });
     }
 
