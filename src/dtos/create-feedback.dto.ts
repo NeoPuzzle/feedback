@@ -23,7 +23,7 @@ export class CreateFeedbackDto {
 
   @IsOptional()
   @IsString()
-  user_id?: string;
+  userId?: string;
 
   @IsOptional()
   @IsString()
