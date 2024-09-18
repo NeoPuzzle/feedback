@@ -23,7 +23,7 @@ export class FeedbackService {
 
     getAll(): Promise<Feedback[]> {
         return this.feedbackRepository.find({
-            relations: ['user', 'local', 'type', 'destination', 'manager'],
+            relations: ['user', 'local', 'type', 'destination','local.manager'],
         });
     }
 
@@ -52,36 +52,41 @@ export class FeedbackService {
         });
     }
 
-    async createFeedback(createFeedbackDto: CreateFeedbackDto, image1: Express.Multer.File, image2: Express.Multer.File): Promise <Feedback> {
-        const user = createFeedbackDto.user_id ? await this.usersService.findOne(createFeedbackDto.user_id) : null;
+    async createFeedback(createFeedbackDto: CreateFeedbackDto, image1: Express.Multer.File, image2: Express.Multer.File): Promise<Feedback> {
+        const user = createFeedbackDto.userId ? await this.usersService.findOne(createFeedbackDto.userId) : null;
         const local = createFeedbackDto.localId ? await this.localService.findOne(createFeedbackDto.localId) : null;
         const type = createFeedbackDto.typeId ? await this.feedbackTypeService.findOne(createFeedbackDto.typeId) : null;
         const destination = createFeedbackDto.destinationId ? await this.destinationTypeService.findOne(createFeedbackDto.destinationId) : null;
-        
+    
+        console.log(`DTO: ${JSON.stringify(createFeedbackDto)}`);
+        console.log(`Usuario: ${user}`);
+    
         let image1Url: string | undefined;
         let image2Url: string | undefined;
-        
+    
         if (image1) {
             image1Url = await this.uploadImage(image1);
         }
         if (image2) {
             image2Url = await this.uploadImage(image2);
         }
-
+    
         const feedback = this.feedbackRepository.create({
             subject: createFeedbackDto.subject,
             description: createFeedbackDto.description,
             date: createFeedbackDto.date ? new Date(createFeedbackDto.date) : undefined,
             image1Url,
             image2Url,
-            user,
-            local,
-            type,
-            destination,
+            user: user ? { id: user.id } : null,
+            local: local ? { id: local.id } : null,
+            type: type ? { id: type.id } : null,
+            destination: destination ? { id: destination.id } : null,
         });
         
+    
         return this.feedbackRepository.save(feedback);
     }
+    
 
     async updateFeedback(id: string, updateFeedbackDto: UpdateFeedbackDto, files: any) : Promise<Feedback> {
         const feedback = await this.findOne(id);
